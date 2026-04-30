@@ -42,3 +42,11 @@ export async function exportStems(args: {
 export function onSidecarEvent(handler: (e: SidecarEvent) => void): Promise<UnlistenFn> {
   return listen<SidecarEvent>("sidecar-event", (e) => handler(e.payload));
 }
+
+export async function prefetchModel(): Promise<void> {
+  return invoke("prefetch_model");
+}
+
+export function onPrefetchEvent(handler: (e: SidecarEvent) => void): Promise<UnlistenFn> {
+  return listen<SidecarEvent>("prefetch-event", (e) => handler(e.payload));
+}

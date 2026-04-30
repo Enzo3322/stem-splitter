@@ -30,6 +30,7 @@ pub enum Stage {
     Download,
     Separate,
     Export,
+    Prefetch,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]

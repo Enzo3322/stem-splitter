@@ -54,6 +54,13 @@ pub async fn cancel_job(
 }
 
 #[tauri::command]
+pub async fn prefetch_model(app: AppHandle) -> Result<(), String> {
+    SidecarManager::run_prefetch(app, vec!["prefetch-model".into()])
+        .await
+        .map_err(err_string)
+}
+
+#[tauri::command]
 pub async fn get_device_info(app: AppHandle) -> Result<DeviceInfo, String> {
     let events = SidecarManager::run_oneshot(app, vec!["device-info".into()])
         .await

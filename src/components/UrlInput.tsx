@@ -2,18 +2,21 @@ import { useState } from "react";
 import { processUrl } from "../lib/tauri";
 import { isYouTubeUrl } from "../lib/url";
 import { useJobStore } from "../stores/jobStore";
+import { usePrefetchStore } from "../stores/prefetchStore";
 
 export function UrlInput() {
   const [url, setUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const startJob = useJobStore((s) => s.startJob);
+  const prefetchStatus = usePrefetchStore((s) => s.status);
 
+  const modelReady = prefetchStatus === "ready";
   const valid = isYouTubeUrl(url);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!valid || submitting) return;
+    if (!valid || submitting || !modelReady) return;
     setSubmitting(true);
     setLocalError(null);
     try {
@@ -44,20 +47,22 @@ export function UrlInput() {
         />
         <button
           type="submit"
-          disabled={!valid || submitting}
+          disabled={!valid || submitting || !modelReady}
           className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white
             hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-neutral-700"
         >
-          {submitting ? "..." : "Processar"}
+          {submitting ? "..." : modelReady ? "Processar" : "Carregando modelo..."}
         </button>
       </div>
       {url && !valid && (
         <p className="text-xs text-red-400">URL precisa ser do YouTube (youtube.com ou youtu.be).</p>
       )}
       {localError && <p className="text-xs text-red-400">{localError}</p>}
-      <p className="text-xs text-neutral-500">
-        Primeira execução baixa o modelo Demucs (~250 MB).
-      </p>
+      {!modelReady && (
+        <p className="text-xs text-neutral-500">
+          Aguardando o modelo Demucs ficar pronto antes de processar.
+        </p>
+      )}
     </form>
   );
 }

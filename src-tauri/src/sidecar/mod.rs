@@ -8,7 +8,7 @@ use tauri_plugin_shell::ShellExt;
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-use crate::events::emit_sidecar;
+use crate::events::{emit_prefetch, emit_sidecar};
 use crate::types::SidecarEvent;
 
 pub type JobId = String;
@@ -139,6 +139,70 @@ impl SidecarManager {
     pub fn cancel(&self, job_id: &str) -> Result<()> {
         if let Some((_, handle)) = self.jobs.remove(job_id) {
             handle.kill()?;
+        }
+        Ok(())
+    }
+
+    /// Streams sidecar events to the `prefetch-event` channel until the process
+    /// exits. Returns Err if the sidecar emits an `error` event or terminates
+    /// non-zero. Used for the model pre-download on app startup.
+    pub async fn run_prefetch(app: AppHandle, args: Vec<String>) -> Result<()> {
+        let shell = app.shell();
+        let cmd = shell
+            .sidecar(SIDECAR_NAME)
+            .context("locating sidecar binary")?
+            .args(&args);
+
+        let (mut rx, _child) = cmd.spawn().context("spawn sidecar")?;
+        let mut buf = String::new();
+        let mut last_error: Option<String> = None;
+
+        while let Some(event) = rx.recv().await {
+            match event {
+                CommandEvent::Stdout(bytes) => {
+                    if let Ok(s) = std::str::from_utf8(&bytes) {
+                        buf.push_str(s);
+                        while let Some(idx) = buf.find('\n') {
+                            let line = buf[..idx].trim().to_string();
+                            buf.drain(..=idx);
+                            if line.is_empty() { continue; }
+                            match serde_json::from_str::<SidecarEvent>(&line) {
+                                Ok(ev) => {
+                                    if let SidecarEvent::Error { message, .. } = &ev {
+                                        last_error = Some(message.clone());
+                                    }
+                                    emit_prefetch(&app, &ev);
+                                }
+                                Err(err) => tracing::warn!(?err, raw = %line, "unparsable prefetch event"),
+                            }
+                        }
+                    }
+                }
+                CommandEvent::Stderr(bytes) => {
+                    if let Ok(s) = std::str::from_utf8(&bytes) {
+                        tracing::debug!(target: "sidecar.prefetch", "stderr: {}", s.trim());
+                    }
+                }
+                CommandEvent::Terminated(payload) => {
+                    tracing::info!(?payload, "prefetch sidecar terminated");
+                    if let Some(code) = payload.code {
+                        if code != 0 && last_error.is_none() {
+                            last_error = Some(format!("sidecar exited with code {code}"));
+                        }
+                    }
+                    break;
+                }
+                _ => {}
+            }
+        }
+        let tail = buf.trim();
+        if !tail.is_empty() {
+            if let Ok(ev) = serde_json::from_str::<SidecarEvent>(tail) {
+                emit_prefetch(&app, &ev);
+            }
+        }
+        if let Some(msg) = last_error {
+            anyhow::bail!(msg);
         }
         Ok(())
     }

@@ -63,6 +63,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--output-dir", required=True)
     pr.add_argument("--model", default="htdemucs_6s")
 
+    pf = sub.add_parser("prefetch-model", help="Pre-baixa pesos do Demucs")
+    pf.add_argument("--model", default="htdemucs_6s")
+
     return p
 
 
@@ -187,11 +190,23 @@ def cmd_process(emitter: Emitter, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_prefetch_model(emitter: Emitter, args: argparse.Namespace) -> int:
+    from .prefetch import prefetch_model
+    from .separator import SeparationFailed
+    try:
+        prefetch_model(emitter, model_name=args.model)
+        return 0
+    except SeparationFailed as e:
+        emitter.error(e.code, str(e))
+        return 4
+
+
 COMMANDS = {
     "device-info": cmd_device_info,
     "download": cmd_download,
     "separate": cmd_separate,
     "process": cmd_process,
+    "prefetch-model": cmd_prefetch_model,
 }
 
 

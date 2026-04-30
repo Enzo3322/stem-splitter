@@ -15,7 +15,7 @@ export const STEM_NAMES: readonly StemName[] = [
   "other",
 ] as const;
 
-export type Stage = "download" | "separate" | "export";
+export type Stage = "download" | "separate" | "export" | "prefetch";
 
 export type Device = "cuda" | "mps" | "cpu";
 

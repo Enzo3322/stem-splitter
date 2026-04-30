@@ -9,7 +9,7 @@ from typing import Any, Iterator, Literal
 
 
 Level = Literal["debug", "info", "warn", "error"]
-Stage = Literal["download", "separate", "export"]
+Stage = Literal["download", "separate", "export", "prefetch"]
 
 
 def _now_ms() -> int:

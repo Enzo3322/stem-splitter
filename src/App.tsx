@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { AboutView } from "./components/AboutView";
 import { DeviceBadge } from "./components/DeviceBadge";
+import { ModelPrefetchBanner } from "./components/ModelPrefetchBanner";
 import { ProgressView } from "./components/ProgressView";
 import { SettingsView } from "./components/SettingsView";
 import { StemPlayer } from "./components/StemPlayer";
 import { UrlInput } from "./components/UrlInput";
+import { usePrefetchModel } from "./hooks/usePrefetchModel";
 import { useSidecarEvents } from "./hooks/useSidecarEvents";
 import { useJobStore } from "./stores/jobStore";
 
@@ -12,6 +14,7 @@ type Pane = "main" | "settings" | "about";
 
 export default function App() {
   useSidecarEvents();
+  usePrefetchModel();
   const status = useJobStore((s) => s.status);
   const stems = useJobStore((s) => s.stems);
   const cacheKey = useJobStore((s) => s.cacheKey);
@@ -38,6 +41,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 overflow-y-auto">
+        {pane === "main" && <ModelPrefetchBanner />}
         {pane === "settings" && <SettingsView onClose={() => setPane("main")} />}
         {pane === "about" && <AboutView onClose={() => setPane("main")} />}
         {pane === "main" && (

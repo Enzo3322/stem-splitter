@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { save } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { exportStems } from "../lib/tauri";
 import type { AudioFormat, StemName } from "../types/sidecar";
 
@@ -42,14 +42,20 @@ export function ExportDialog({ open, onClose, cacheKey, availableStems }: Props)
     setError(null);
     try {
       const wantZip = asZip && format === "wav" && selected.size > 1;
-      const target = await save({
-        title: "Salvar stems",
-        ...(wantZip ? { defaultPath: "stems.zip" } : {}),
-        filters: wantZip
-          ? [{ name: "ZIP", extensions: ["zip"] }]
-          : [{ name: "Pasta", extensions: [] }],
-      });
-      if (!target) {
+      // ZIP → save dialog (file path). Demais → open dialog em modo diretório,
+      // pois o backend trata `outputPath` como pasta e faz `join(stem.ext)`.
+      const target = wantZip
+        ? await save({
+            title: "Salvar stems",
+            defaultPath: "stems.zip",
+            filters: [{ name: "ZIP", extensions: ["zip"] }],
+          })
+        : await open({
+            title: "Selecionar pasta de saída",
+            directory: true,
+            multiple: false,
+          });
+      if (!target || typeof target !== "string") {
         setBusy(false);
         return;
       }

@@ -42,6 +42,8 @@ const STAGE_WEIGHTS: Record<Stage, [number, number]> = {
   download: [0, 40],
   separate: [40, 100],
   export: [0, 100],
+  // Prefetch flows on a separate channel; never reaches the job store.
+  prefetch: [0, 0],
 };
 
 const initial = {
