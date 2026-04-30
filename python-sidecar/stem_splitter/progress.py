@@ -54,14 +54,18 @@ class Emitter:
         cache_key: str,
         cache_hit: bool = False,
         duration_seconds: float = 0.0,
+        title: str | None = None,
     ) -> None:
-        self._emit({
+        payload: dict[str, Any] = {
             "event": "complete",
             "stems": stems,
             "cache_key": cache_key,
             "cache_hit": cache_hit,
             "duration_seconds": float(duration_seconds),
-        })
+        }
+        if title is not None:
+            payload["title"] = title
+        self._emit(payload)
 
     def error(
         self,

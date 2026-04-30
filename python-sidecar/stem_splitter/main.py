@@ -104,6 +104,7 @@ def cmd_download(emitter: Emitter, args: argparse.Namespace) -> int:
         return 3
 
 
+
 def cmd_separate(emitter: Emitter, args: argparse.Namespace) -> int:
     from .separator import separate, SeparationFailed
     try:
@@ -138,17 +139,19 @@ def cmd_process(emitter: Emitter, args: argparse.Namespace) -> int:
             emitter.log("info", f"cache hit: {hit.cache_key}")
             for name, path in hit.stems.items():
                 emitter.stem_ready(name, str(path), path.stat().st_size)
+            cached_title = hit.metadata.get("title")
             emitter.complete(
                 stems=[{"name": n, "path": str(p)} for n, p in hit.stems.items()],
                 cache_key=hit.cache_key,
                 cache_hit=True,
                 duration_seconds=time.time() - started,
+                title=cached_title if isinstance(cached_title, str) else None,
             )
             return 0
 
     # Download
     try:
-        audio_path = download(args.url, Path(args.output_dir), emitter)
+        audio_path, title = download(args.url, Path(args.output_dir), emitter)
     except InvalidURL as e:
         emitter.error("INVALID_URL", str(e))
         return 2
@@ -172,7 +175,8 @@ def cmd_process(emitter: Emitter, args: argparse.Namespace) -> int:
 
     # Cache store
     try:
-        cached = cache_mod.store(args.url, stems, cache_dir)
+        extra_meta = {"title": title} if title is not None else None
+        cached = cache_mod.store(args.url, stems, cache_dir, extra_meta=extra_meta)
         cache_mod.evict_lru(cache_dir)
         cache_key = cached.cache_key
         final_stems = cached.stems
@@ -186,6 +190,7 @@ def cmd_process(emitter: Emitter, args: argparse.Namespace) -> int:
         cache_key=cache_key,
         cache_hit=False,
         duration_seconds=time.time() - started,
+        title=title,
     )
     return 0
 

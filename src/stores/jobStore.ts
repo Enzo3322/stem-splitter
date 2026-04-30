@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ErrorCode, SidecarEvent, Stage, Stem } from "../types/sidecar";
+import type { ErrorCode, LibraryEntry, SidecarEvent, Stage, Stem } from "../types/sidecar";
 
 export type JobStatus =
   | "idle"
@@ -28,6 +28,7 @@ interface JobState {
   stems: Stem[];
   cacheKey: string | null;
   cacheHit: boolean;
+  title: string | null;
   errorCode: ErrorCode | null;
   errorMessage: string | null;
   logs: LogLine[];
@@ -35,6 +36,7 @@ interface JobState {
   // actions
   startJob: (jobId: string, url: string) => void;
   applyEvent: (event: SidecarEvent) => void;
+  loadFromCache: (entry: LibraryEntry) => void;
   reset: () => void;
 }
 
@@ -57,6 +59,7 @@ const initial = {
   stems: [] as Stem[],
   cacheKey: null,
   cacheHit: false,
+  title: null as string | null,
   errorCode: null,
   errorMessage: null,
   logs: [] as LogLine[],
@@ -76,6 +79,20 @@ export const useJobStore = create<JobState>((set, get) => ({
     }),
 
   reset: () => set({ ...initial }),
+
+  loadFromCache: (entry) =>
+    set({
+      ...initial,
+      jobId: entry.cache_key,
+      url: entry.url,
+      title: entry.title,
+      status: "ready",
+      stems: entry.stems,
+      cacheKey: entry.cache_key,
+      cacheHit: true,
+      globalPercent: 100,
+      message: "Resultado em cache",
+    }),
 
   applyEvent: (event) => {
     // Ignora eventos de outros jobs (corrida na troca de URL).
@@ -118,6 +135,7 @@ export const useJobStore = create<JobState>((set, get) => ({
           stems: event.stems,
           cacheKey: event.cache_key,
           cacheHit: event.cache_hit,
+          title: event.title ?? null,
           globalPercent: 100,
           message: event.cache_hit ? "Resultado em cache" : "Pronto",
         });

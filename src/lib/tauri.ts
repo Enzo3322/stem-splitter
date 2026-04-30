@@ -3,6 +3,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type {
   AudioFormat,
   DeviceInfo,
+  LibraryEntry,
   SidecarEvent,
   StemName,
 } from "../types/sidecar";
@@ -45,6 +46,14 @@ export function onSidecarEvent(handler: (e: SidecarEvent) => void): Promise<Unli
 
 export async function prefetchModel(): Promise<void> {
   return invoke("prefetch_model");
+}
+
+export async function listCacheEntries(): Promise<LibraryEntry[]> {
+  return invoke<LibraryEntry[]>("list_cache_entries");
+}
+
+export async function touchCacheEntry(cacheKey: string): Promise<void> {
+  return invoke("touch_cache_entry", { cacheKey });
 }
 
 export function onPrefetchEvent(handler: (e: SidecarEvent) => void): Promise<UnlistenFn> {

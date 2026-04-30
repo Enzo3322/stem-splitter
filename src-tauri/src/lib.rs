@@ -32,6 +32,8 @@ pub fn run() {
             commands::get_cache_size,
             commands::export_stems,
             commands::prefetch_model,
+            commands::list_cache_entries,
+            commands::touch_cache_entry,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -26,6 +26,7 @@ venv/
 build/
 *.spec
 python-sidecar/dist/
+python-sidecar/_models/
 
 # IDE / OS
 .vscode/

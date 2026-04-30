@@ -55,8 +55,8 @@ def extract_video_id(url: str) -> str:
     return m.group("id")
 
 
-def download(url: str, output_dir: Path, emitter: Emitter) -> Path:
-    """Baixa best audio em WAV, retorna o path do arquivo."""
+def download(url: str, output_dir: Path, emitter: Emitter) -> tuple[Path, str | None]:
+    """Baixa best audio em WAV, retorna (path do arquivo, título do YouTube)."""
     video_id = extract_video_id(url)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -104,9 +104,14 @@ def download(url: str, output_dir: Path, emitter: Emitter) -> Path:
         ydl_opts["ffmpeg_location"] = ffmpeg_path
         emitter.log("debug", f"ffmpeg: {ffmpeg_path}")
 
+    title: str | None = None
     try:
         with YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+            info = ydl.extract_info(url, download=True)
+            if isinstance(info, dict):
+                raw_title = info.get("title")
+                if isinstance(raw_title, str) and raw_title.strip():
+                    title = raw_title.strip()
     except DownloadError as e:
         msg = str(e)
         code = "VIDEO_UNAVAILABLE" if any(
@@ -124,4 +129,4 @@ def download(url: str, output_dir: Path, emitter: Emitter) -> Path:
         target = candidates[0]
 
     emitter.stage_complete("download", str(target))
-    return target
+    return target, title

@@ -3,6 +3,7 @@ import { AboutView } from "./components/AboutView";
 import { DeviceBadge } from "./components/DeviceBadge";
 import { ModelPrefetchBanner } from "./components/ModelPrefetchBanner";
 import { ProgressView } from "./components/ProgressView";
+import { RecentTracks } from "./components/RecentTracks";
 import { SettingsView } from "./components/SettingsView";
 import { StemPlayer } from "./components/StemPlayer";
 import { UrlInput } from "./components/UrlInput";
@@ -18,6 +19,7 @@ export default function App() {
   const status = useJobStore((s) => s.status);
   const stems = useJobStore((s) => s.stems);
   const cacheKey = useJobStore((s) => s.cacheKey);
+  const title = useJobStore((s) => s.title);
   const [pane, setPane] = useState<Pane>("main");
 
   return (
@@ -46,13 +48,18 @@ export default function App() {
         {pane === "about" && <AboutView onClose={() => setPane("main")} />}
         {pane === "main" && (
           <>
-            {status === "idle" && <UrlInput />}
+            {status === "idle" && (
+              <>
+                <UrlInput />
+                <RecentTracks />
+              </>
+            )}
             {(status === "downloading" ||
               status === "separating" ||
               status === "error" ||
               status === "cancelled") && <ProgressView />}
             {status === "ready" && stems.length > 0 && cacheKey && (
-              <StemPlayer stems={stems} cacheKey={cacheKey} />
+              <StemPlayer stems={stems} cacheKey={cacheKey} title={title} />
             )}
           </>
         )}

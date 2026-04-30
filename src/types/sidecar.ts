@@ -35,7 +35,7 @@ export type SidecarEvent =
   | { event: "progress"; job_id: string; ts: number; stage: Stage; percent: number; message: string }
   | { event: "stage_complete"; job_id: string; ts: number; stage: Stage; output_path: string }
   | { event: "stem_ready"; job_id: string; ts: number; name: StemName; path: string; size_bytes: number }
-  | { event: "complete"; job_id: string; ts: number; stems: Stem[]; cache_key: string; cache_hit: boolean; duration_seconds: number }
+  | { event: "complete"; job_id: string; ts: number; stems: Stem[]; cache_key: string; cache_hit: boolean; duration_seconds: number; title?: string | null }
   | { event: "error"; job_id: string; ts: number; code: ErrorCode; message: string; details?: string; recoverable: boolean }
   | { event: "log"; job_id: string; ts: number; level: "debug" | "info" | "warn" | "error"; message: string };
 
@@ -51,3 +51,13 @@ export type ErrorCode =
   | "INTERNAL";
 
 export type AudioFormat = { kind: "wav" } | { kind: "mp3"; bitrate_kbps: 128 | 192 | 320 };
+
+export interface LibraryEntry {
+  cache_key: string;
+  url: string;
+  video_id: string;
+  title: string | null;
+  stored_at: number;
+  size_bytes: number;
+  stems: Stem[];
+}

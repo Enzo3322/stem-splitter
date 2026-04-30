@@ -8,7 +8,7 @@ use tauri_plugin_shell::process::CommandEvent;
 
 use crate::cache;
 use crate::sidecar::{JobId, SidecarManager};
-use crate::types::{AudioFormat, DeviceInfo, SidecarEvent, StemName};
+use crate::types::{AudioFormat, DeviceInfo, LibraryEntry, SidecarEvent, StemName};
 
 pub struct AppState {
     pub sidecar: SidecarManager,
@@ -83,6 +83,18 @@ pub async fn clear_cache(app: AppHandle) -> Result<(), String> {
 pub async fn get_cache_size(app: AppHandle) -> Result<u64, String> {
     let dir = cache::cache_dir(&app).map_err(err_string)?;
     Ok(cache::dir_size_bytes(&dir))
+}
+
+#[tauri::command]
+pub async fn list_cache_entries(app: AppHandle) -> Result<Vec<LibraryEntry>, String> {
+    let dir = cache::cache_dir(&app).map_err(err_string)?;
+    Ok(cache::list_entries(&dir))
+}
+
+#[tauri::command]
+pub async fn touch_cache_entry(app: AppHandle, cache_key: String) -> Result<(), String> {
+    let dir = cache::cache_dir(&app).map_err(err_string)?;
+    cache::touch_entry(&dir, &cache_key).map_err(err_string)
 }
 
 #[derive(Debug, Deserialize)]

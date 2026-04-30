@@ -92,6 +92,8 @@ pub enum SidecarEvent {
         cache_hit: bool,
         #[serde(default)]
         duration_seconds: f64,
+        #[serde(default)]
+        title: Option<String>,
     },
     Error {
         job_id: String,
@@ -124,4 +126,15 @@ pub enum SidecarEvent {
 pub enum AudioFormat {
     Wav,
     Mp3 { bitrate_kbps: u32 },
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct LibraryEntry {
+    pub cache_key: String,
+    pub url: String,
+    pub video_id: String,
+    pub title: Option<String>,
+    pub stored_at: u64,
+    pub size_bytes: u64,
+    pub stems: Vec<Stem>,
 }

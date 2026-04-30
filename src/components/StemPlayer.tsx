@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useStemPlayer } from "../hooks/useStemPlayer";
 import { usePlayerStore } from "../stores/playerStore";
 import type { Stem, StemName } from "../types/sidecar";
@@ -25,9 +26,12 @@ const STEM_LABELS: Record<StemName, string> = {
 interface Props {
   stems: Stem[];
   cacheKey: string;
+  title?: string | null;
 }
 
-export function StemPlayer({ stems, cacheKey }: Props) {
+const DEFAULT_WINDOW_TITLE = "Stem Splitter";
+
+export function StemPlayer({ stems, cacheKey, title }: Props) {
   const player = useStemPlayer({ stems, colorOf: (n) => STEM_COLORS[n] });
   const playing = usePlayerStore((s) => s.playing);
   const position = usePlayerStore((s) => s.position);
@@ -38,8 +42,24 @@ export function StemPlayer({ stems, cacheKey }: Props) {
   const setVolume = usePlayerStore((s) => s.setVolume);
   const [exportOpen, setExportOpen] = useState(false);
 
+  useEffect(() => {
+    const win = getCurrentWindow();
+    const next = title && title.trim()
+      ? `${DEFAULT_WINDOW_TITLE} — ${title}`
+      : DEFAULT_WINDOW_TITLE;
+    win.setTitle(next).catch(() => { /* best effort */ });
+    return () => {
+      win.setTitle(DEFAULT_WINDOW_TITLE).catch(() => { /* best effort */ });
+    };
+  }, [title]);
+
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-6">
+      {title && (
+        <h2 className="truncate text-lg font-semibold text-neutral-100" title={title}>
+          {title}
+        </h2>
+      )}
       <div className="flex items-center gap-3">
         <button
           onClick={player.toggle}
