@@ -125,11 +125,9 @@ def build(target: str, clean: bool) -> Path:
         "--log-level", "WARN",
     ]
 
-    # macOS: --onedir é mais robusto pra code signing/notarization.
-    if is_macos(target):
-        args.append("--onedir")
-    else:
-        args.append("--onefile")
+    # --onefile em todas as plataformas: Tauri externalBin só copia um único
+    # arquivo, então onedir+symlink quebra (deps ficam fora do .app).
+    args.append("--onefile")
 
     # Bundle the torch hub cache (Demucs weights). Keep the same relative path
     # `_models/torch` inside the bundle; entrypoint.py points TORCH_HOME at it.
@@ -144,53 +142,20 @@ def build(target: str, clean: bool) -> Path:
     print(">", " ".join(args), flush=True)
     subprocess.run(args, check=True, cwd=ROOT)
 
-    # Resolve o artefato produzido pelo PyInstaller.
-    if is_macos(target):
-        produced = DIST_DIR / base_name  # diretório
-    elif is_windows(target):
-        produced = DIST_DIR / f"{base_name}.exe"
-    else:
-        produced = DIST_DIR / base_name
-
+    # Resolve o artefato produzido pelo PyInstaller (--onefile = arquivo único).
+    produced = DIST_DIR / (f"{base_name}.exe" if is_windows(target) else base_name)
     if not produced.exists():
         raise SystemExit(f"PyInstaller não produziu {produced}")
 
     # Copia pro src-tauri/binaries com o sufixo de target esperado pelo Tauri.
     TAURI_BIN_DIR.mkdir(parents=True, exist_ok=True)
     suffix = ".exe" if is_windows(target) else ""
-    dst_name = f"{base_name}-{target}{suffix}"
-    dst = TAURI_BIN_DIR / dst_name
-
-    if produced.is_dir():
-        # macOS onedir: copia dir e usa o executável interno como sidecar via wrapper.
-        # Tauri 2 aceita dirs como externalBin? Não — só executáveis. Então criamos
-        # um symlink/exe principal apontado pra dir.
-        if dst.exists() or dst.is_symlink():
-            if dst.is_dir():
-                shutil.rmtree(dst)
-            else:
-                dst.unlink()
-        # Copia a pasta toda pra pasta irmã com sufixo de target.
-        target_dir = TAURI_BIN_DIR / f"{base_name}-{target}.app-bundle"
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(produced, target_dir)
-        # E coloca o executável principal apontado.
-        main_exe = target_dir / base_name
-        if not main_exe.exists():
-            raise SystemExit(f"executável interno não encontrado: {main_exe}")
-        if dst.exists() or dst.is_symlink():
-            dst.unlink()
-        try:
-            dst.symlink_to(main_exe.relative_to(TAURI_BIN_DIR))
-        except OSError:
-            shutil.copy2(main_exe, dst)
-    else:
-        if dst.exists():
-            dst.unlink()
-        shutil.copy2(produced, dst)
-        if not is_windows(target):
-            dst.chmod(0o755)
+    dst = TAURI_BIN_DIR / f"{base_name}-{target}{suffix}"
+    if dst.exists() or dst.is_symlink():
+        dst.unlink()
+    shutil.copy2(produced, dst)
+    if not is_windows(target):
+        dst.chmod(0o755)
 
     print(f"OK -> {dst}")
     return dst
