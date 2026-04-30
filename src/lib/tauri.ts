@@ -36,7 +36,7 @@ export async function exportStems(args: {
   outputPath: string;
   asZip?: boolean;
 }): Promise<void> {
-  return invoke("export_stems", args);
+  return invoke("export_stems", { args });
 }
 
 export function onSidecarEvent(handler: (e: SidecarEvent) => void): Promise<UnlistenFn> {

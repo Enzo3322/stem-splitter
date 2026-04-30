@@ -29,12 +29,18 @@ pub async fn process_url(
     url: String,
 ) -> Result<JobId, String> {
     let cache_dir = cache::cache_dir(&app).map_err(err_string)?;
+    let cache_dir_str = cache_dir.to_string_lossy().into_owned();
+    // `--cache-dir` is a global flag and must precede the `process` subcommand
+    // for argparse on the sidecar side. It also pins the cache root to match
+    // where `export_stems` looks up `{cache_key}/{stem}.wav`.
     let args = vec![
+        "--cache-dir".into(),
+        cache_dir_str.clone(),
         "process".into(),
         "--url".into(),
         url,
         "--output-dir".into(),
-        cache_dir.to_string_lossy().into_owned(),
+        cache_dir_str,
     ];
     state.sidecar.spawn(app, args).map_err(err_string)
 }
