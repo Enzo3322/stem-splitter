@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { open as openDialog, save } from "@tauri-apps/plugin-dialog";
 import { exportStems } from "../lib/tauri";
 import type { AudioFormat, StemName } from "../types/sidecar";
 
@@ -50,7 +50,7 @@ export function ExportDialog({ open, onClose, cacheKey, availableStems }: Props)
             defaultPath: "stems.zip",
             filters: [{ name: "ZIP", extensions: ["zip"] }],
           })
-        : await open({
+        : await openDialog({
             title: "Selecionar pasta de saída",
             directory: true,
             multiple: false,
