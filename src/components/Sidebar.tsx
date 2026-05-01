@@ -1,3 +1,4 @@
+import { useJobStore } from "../stores/jobStore";
 import { useViewStore, type View } from "../stores/viewStore";
 
 interface NavItem {
@@ -16,6 +17,17 @@ const ITEMS: NavItem[] = [
 export function Sidebar() {
   const view = useViewStore((s) => s.view);
   const setView = useViewStore((s) => s.setView);
+  const jobStatus = useJobStore((s) => s.status);
+  const resetJob = useJobStore((s) => s.reset);
+
+  function handleClick(id: View) {
+    if (id === "home") {
+      // "Nova faixa" sempre limpa o job atual pra mostrar o input.
+      // Faixa segue acessível pela Biblioteca (cache em disco).
+      if (jobStatus !== "idle") resetJob();
+    }
+    setView(id);
+  }
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950/40">
@@ -31,7 +43,7 @@ export function Sidebar() {
           return (
             <button
               key={item.id}
-              onClick={() => setView(item.id)}
+              onClick={() => handleClick(item.id)}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
                 active
                   ? "bg-neutral-900 text-neutral-100"

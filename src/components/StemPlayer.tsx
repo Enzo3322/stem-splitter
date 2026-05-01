@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useStemPlayer } from "../hooks/useStemPlayer";
+import { useJobStore } from "../stores/jobStore";
 import { usePlayerStore } from "../stores/playerStore";
 import type { Stem, StemName } from "../types/sidecar";
 import { ExportDialog } from "./ExportDialog";
@@ -38,6 +39,7 @@ export function StemPlayer({ stems, cacheKey, title }: Props) {
   const toggleMute = usePlayerStore((s) => s.toggleMute);
   const toggleSolo = usePlayerStore((s) => s.toggleSolo);
   const setVolume = usePlayerStore((s) => s.setVolume);
+  const resetJob = useJobStore((s) => s.reset);
   const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
@@ -67,8 +69,14 @@ export function StemPlayer({ stems, cacheKey, title }: Props) {
         </button>
         <TimeDisplay />
         <button
-          onClick={() => setExportOpen(true)}
+          onClick={resetJob}
           className="ml-auto rounded-md border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
+        >
+          + Nova faixa
+        </button>
+        <button
+          onClick={() => setExportOpen(true)}
+          className="rounded-md border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
         >
           Exportar
         </button>
