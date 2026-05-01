@@ -56,6 +56,10 @@ export async function touchCacheEntry(cacheKey: string): Promise<void> {
   return invoke("touch_cache_entry", { cacheKey });
 }
 
+export async function readAudioBytes(path: string): Promise<ArrayBuffer> {
+  return invoke<ArrayBuffer>("read_audio_bytes", { path });
+}
+
 export function onPrefetchEvent(handler: (e: SidecarEvent) => void): Promise<UnlistenFn> {
   return listen<SidecarEvent>("prefetch-event", (e) => handler(e.payload));
 }

@@ -97,6 +97,24 @@ pub async fn touch_cache_entry(app: AppHandle, cache_key: String) -> Result<(), 
     cache::touch_entry(&dir, &cache_key).map_err(err_string)
 }
 
+#[tauri::command]
+pub async fn read_audio_bytes(
+    app: AppHandle,
+    path: String,
+) -> Result<tauri::ipc::Response, String> {
+    // Confina leitura ao cache da app — frontend não tem motivo pra ler
+    // arquivos arbitrários, e Response pula CSP/asset protocol que falham
+    // pra fetch() em alguns paths/builds.
+    let cache_root = cache::cache_dir(&app).map_err(err_string)?;
+    let canonical_root = std::fs::canonicalize(&cache_root).map_err(err_string)?;
+    let canonical_path = std::fs::canonicalize(&path).map_err(err_string)?;
+    if !canonical_path.starts_with(&canonical_root) {
+        return Err(format!("path fora do cache: {}", path));
+    }
+    let bytes = std::fs::read(&canonical_path).map_err(err_string)?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportArgs {

@@ -34,6 +34,7 @@ pub fn run() {
             commands::prefetch_model,
             commands::list_cache_entries,
             commands::touch_cache_entry,
+            commands::read_audio_bytes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

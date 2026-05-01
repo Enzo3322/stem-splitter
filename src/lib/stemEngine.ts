@@ -1,5 +1,5 @@
 import WaveSurfer from "wavesurfer.js";
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { readAudioBytes } from "./tauri";
 import type { Stem, StemName } from "../types/sidecar";
 
 interface Voice {
@@ -89,14 +89,21 @@ class StemEngine {
     if (!this.ctx) this.ctx = new AudioContext();
     const ctx = this.ctx;
 
-    const decoded = await Promise.all(
-      stems.map(async (stem) => {
-        const res = await fetch(convertFileSrc(stem.path));
-        const arr = await res.arrayBuffer();
-        const buf = await ctx.decodeAudioData(arr);
-        return { stem, buf };
-      }),
-    );
+    let decoded: { stem: Stem; buf: AudioBuffer }[];
+    try {
+      decoded = await Promise.all(
+        stems.map(async (stem) => {
+          const arr = await readAudioBytes(stem.path);
+          const buf = await ctx.decodeAudioData(arr);
+          return { stem, buf };
+        }),
+      );
+    } catch (e) {
+      // Reset currentKey pra permitir retry no próximo load (clicar mesma
+      // entry de novo). Sem isso, key === currentKey e load() volta cedo.
+      this.currentKey = "";
+      throw e;
+    }
 
     if (key !== this.currentKey) return; // outra carga superou esta
 
