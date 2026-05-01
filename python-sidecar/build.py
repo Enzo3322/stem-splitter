@@ -67,7 +67,6 @@ def hidden_imports() -> list[str]:
         "demucs.audio",
         "yt_dlp",
         "soundfile",
-        "pkg_resources.py2_warn",
     ]
 
 

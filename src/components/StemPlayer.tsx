@@ -34,8 +34,6 @@ const DEFAULT_WINDOW_TITLE = "Stem Splitter";
 export function StemPlayer({ stems, cacheKey, title }: Props) {
   const player = useStemPlayer({ stems, colorOf: (n) => STEM_COLORS[n] });
   const playing = usePlayerStore((s) => s.playing);
-  const position = usePlayerStore((s) => s.position);
-  const duration = usePlayerStore((s) => s.duration);
   const controls = usePlayerStore((s) => s.controls);
   const toggleMute = usePlayerStore((s) => s.toggleMute);
   const toggleSolo = usePlayerStore((s) => s.toggleSolo);
@@ -67,9 +65,7 @@ export function StemPlayer({ stems, cacheKey, title }: Props) {
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <span className="font-mono text-sm text-neutral-400">
-          {fmtTime(position)} / {fmtTime(duration)}
-        </span>
+        <TimeDisplay />
         <button
           onClick={() => setExportOpen(true)}
           className="ml-auto rounded-md border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
@@ -148,4 +144,16 @@ function fmtTime(s: number): string {
   const mm = Math.floor(s / 60);
   const ss = Math.floor(s % 60);
   return `${mm}:${ss.toString().padStart(2, "0")}`;
+}
+
+/** Re-renderiza só este span quando position muda. Isolado pra não
+ * forçar reconciliation do StemPlayer inteiro (6 waveforms + sliders). */
+function TimeDisplay() {
+  const position = usePlayerStore((s) => s.position);
+  const duration = usePlayerStore((s) => s.duration);
+  return (
+    <span className="font-mono text-sm text-neutral-400">
+      {fmtTime(position)} / {fmtTime(duration)}
+    </span>
+  );
 }

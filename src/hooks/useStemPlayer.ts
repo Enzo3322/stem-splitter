@@ -75,20 +75,23 @@ export function useStemPlayer({ stems, colorOf }: UseStemPlayerArgs) {
         if (name !== masterName && ws.isPlaying()) ws.pause();
       }
     };
+
+    // timeupdate dispara ~60Hz. Throttle store update a 10Hz pra não
+    // re-renderizar o display a cada frame. Drift correction removida: o
+    // sync inicial no onPlay basta, e seek-storm em 5 <audio> simultâneos
+    // (macOS WebKit) matava o som depois de poucos segundos.
+    let lastStoreUpdate = 0;
     const onTime = (t: number) => {
-      setPosition(t);
-      // Drift correction: se algum follower divergiu mais que 80 ms, re-sync.
-      for (const [name, ws] of Object.entries(created)) {
-        if (name === masterName) continue;
-        if (Math.abs(ws.getCurrentTime() - t) > 0.08) {
-          ws.setTime(t);
-        }
+      const now = performance.now();
+      if (now - lastStoreUpdate >= 100) {
+        lastStoreUpdate = now;
+        setPosition(t);
       }
     };
-    const onSeek = (progress: number) => {
-      const t = progress * master.getDuration();
+    // wavesurfer 7: payload de `seeking` é currentTime em segundos.
+    const onSeek = (currentTime: number) => {
       for (const [name, ws] of Object.entries(created)) {
-        if (name !== masterName) ws.setTime(t);
+        if (name !== masterName) ws.setTime(currentTime);
       }
     };
 
