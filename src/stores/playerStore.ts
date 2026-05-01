@@ -30,8 +30,6 @@ const initialControls = (): Record<StemName, StemControls> => ({
   vocals: { ...defaultControls },
   drums: { ...defaultControls },
   bass: { ...defaultControls },
-  guitar: { ...defaultControls },
-  piano: { ...defaultControls },
   other: { ...defaultControls },
 });
 

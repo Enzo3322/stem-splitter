@@ -10,8 +10,6 @@ const STEM_COLORS: Record<StemName, string> = {
   vocals: "#ec4899",
   drums: "#f59e0b",
   bass: "#8b5cf6",
-  guitar: "#10b981",
-  piano: "#3b82f6",
   other: "#6b7280",
 };
 
@@ -19,8 +17,6 @@ const STEM_LABELS: Record<StemName, string> = {
   vocals: "Vocal",
   drums: "Bateria",
   bass: "Baixo",
-  guitar: "Guitarra",
-  piano: "Piano",
   other: "Outros",
 };
 

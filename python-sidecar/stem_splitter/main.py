@@ -53,18 +53,18 @@ def _build_parser() -> argparse.ArgumentParser:
     dl.add_argument("--url", required=True)
     dl.add_argument("--output-dir", required=True)
 
-    sep = sub.add_parser("separate", help="Separa áudio em 6 stems")
+    sep = sub.add_parser("separate", help="Separa áudio em 4 stems")
     sep.add_argument("--audio-path", required=True)
     sep.add_argument("--output-dir", required=True)
-    sep.add_argument("--model", default="htdemucs_6s")
+    sep.add_argument("--model", default="htdemucs_ft")
 
     pr = sub.add_parser("process", help="Download + separação")
     pr.add_argument("--url", required=True)
     pr.add_argument("--output-dir", required=True)
-    pr.add_argument("--model", default="htdemucs_6s")
+    pr.add_argument("--model", default="htdemucs_ft")
 
     pf = sub.add_parser("prefetch-model", help="Pre-baixa pesos do Demucs")
-    pf.add_argument("--model", default="htdemucs_6s")
+    pf.add_argument("--model", default="htdemucs_ft")
 
     return p
 

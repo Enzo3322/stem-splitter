@@ -14,8 +14,6 @@ const STEM_LABELS: Record<StemName, string> = {
   vocals: "Vocal",
   drums: "Bateria",
   bass: "Baixo",
-  guitar: "Guitarra",
-  piano: "Piano",
   other: "Outros",
 };
 

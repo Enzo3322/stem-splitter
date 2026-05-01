@@ -16,7 +16,7 @@ URL_SHORT = "https://youtu.be/dQw4w9WgXcQ"
 def make_stems(tmp: Path) -> dict[str, Path]:
     tmp.mkdir(parents=True, exist_ok=True)
     out: dict[str, Path] = {}
-    for name in ("vocals", "drums", "bass", "guitar", "piano", "other"):
+    for name in ("vocals", "drums", "bass", "other"):
         p = tmp / f"{name}.wav"
         p.write_bytes(b"RIFF" + b"\x00" * 100)  # bytes arbitrários
         out[name] = p
@@ -74,7 +74,7 @@ def test_evict_lru_respects_limit(tmp_path):
 
 def test_metadata_contents(tmp_path):
     stems = make_stems(tmp_path)
-    cached = cache.store(URL, stems, tmp_path / "c", extra_meta={"model": "htdemucs_6s"})
+    cached = cache.store(URL, stems, tmp_path / "c", extra_meta={"model": "htdemucs_ft"})
     meta = json.loads((cached.directory / "metadata.json").read_text())
-    assert meta["model"] == "htdemucs_6s"
+    assert meta["model"] == "htdemucs_ft"
     assert meta["video_id"] == "dQw4w9WgXcQ"

@@ -17,6 +17,9 @@ interface UseStemPlayerArgs {
 export function useStemPlayer({ stems, colorOf }: UseStemPlayerArgs) {
   const containers = useRef<Record<string, HTMLDivElement | null>>({});
   const instances = useRef<Record<string, WaveSurfer>>({});
+  // Intenção do usuário ("playing" | "paused"). Usado pra retomar após
+  // o macOS WebKit pausar `<audio>` quando a janela perde foco.
+  const intentRef = useRef<"playing" | "paused">("paused");
 
   const setPlaying = usePlayerStore((s) => s.setPlaying);
   const setPosition = usePlayerStore((s) => s.setPosition);
@@ -109,7 +112,22 @@ export function useStemPlayer({ stems, colorOf }: UseStemPlayerArgs) {
       });
     }
 
+    // Retoma playback quando a janela ganha foco/visibilidade — macOS WebKit
+    // suspende media em blur mesmo com a página visível.
+    const resume = () => {
+      if (intentRef.current !== "playing") return;
+      if (master.isPlaying()) return;
+      master.play().catch(() => undefined);
+    };
+    const onVisibility = () => {
+      if (!document.hidden) resume();
+    };
+    window.addEventListener("focus", resume);
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
+      window.removeEventListener("focus", resume);
+      document.removeEventListener("visibilitychange", onVisibility);
       for (const ws of Object.values(created)) {
         ws.destroy();
       }
@@ -135,16 +153,24 @@ export function useStemPlayer({ stems, colorOf }: UseStemPlayerArgs) {
     },
     play: () => {
       const master = instances.current[stems[0]?.name ?? ""];
+      intentRef.current = "playing";
       master?.play().catch(() => undefined);
     },
     pause: () => {
       const master = instances.current[stems[0]?.name ?? ""];
+      intentRef.current = "paused";
       master?.pause();
     },
     toggle: () => {
       const master = instances.current[stems[0]?.name ?? ""];
       if (!master) return;
-      master.isPlaying() ? master.pause() : master.play().catch(() => undefined);
+      if (master.isPlaying()) {
+        intentRef.current = "paused";
+        master.pause();
+      } else {
+        intentRef.current = "playing";
+        master.play().catch(() => undefined);
+      }
     },
     seekTo: (seconds: number) => {
       for (const ws of Object.values(instances.current)) ws.setTime(seconds);

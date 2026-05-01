@@ -1,4 +1,4 @@
-"""Separação em 6 stems via Demucs (htdemucs_6s)."""
+"""Separação em 4 stems via Demucs (htdemucs_ft — bag de 4 modelos fine-tuned)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,8 +10,8 @@ from .progress import Emitter
 if TYPE_CHECKING:
     import torch
 
-STEM_NAMES = ("vocals", "drums", "bass", "guitar", "piano", "other")
-DEFAULT_MODEL = "htdemucs_6s"
+STEM_NAMES = ("vocals", "drums", "bass", "other")
+DEFAULT_MODEL = "htdemucs_ft"
 
 
 class SeparationFailed(RuntimeError):
@@ -104,7 +104,7 @@ def separate(
 
     emitter.progress("separate", 90.0, "Gravando stems...")
 
-    sources_names = list(model.sources)  # ordem do htdemucs_6s
+    sources_names = list(model.sources)  # ordem do htdemucs_ft
     paths: dict[str, Path] = {}
     total_stems = len(sources_names)
 
@@ -121,8 +121,6 @@ def separate(
         emitter.progress("separate", 90.0 + (idx + 1) / total_stems * 10.0,
                          f"Stem {normalized} pronto")
 
-    # Stems faltantes (modelo de 4 stems): emite arquivos vazios pra simplificar UI?
-    # Não — em htdemucs_6s todos existem. Apenas verificamos.
     missing = set(STEM_NAMES) - set(paths.keys())
     if missing:
         emitter.log("warn", f"stems ausentes do modelo: {missing}")
@@ -135,7 +133,6 @@ def _normalize_stem_name(name: str) -> str:
     name = name.lower()
     if name in STEM_NAMES:
         return name
-    # demucs ocasionalmente usa "guitars" / "pianos"
     if name.endswith("s") and name[:-1] in STEM_NAMES:
         return name[:-1]
     return name

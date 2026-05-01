@@ -1,17 +1,9 @@
-export type StemName =
-  | "vocals"
-  | "drums"
-  | "bass"
-  | "guitar"
-  | "piano"
-  | "other";
+export type StemName = "vocals" | "drums" | "bass" | "other";
 
 export const STEM_NAMES: readonly StemName[] = [
   "vocals",
   "drums",
   "bass",
-  "guitar",
-  "piano",
   "other",
 ] as const;
 

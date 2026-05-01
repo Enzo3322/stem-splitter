@@ -30,7 +30,7 @@ export function AboutView({ onClose }: Props) {
         <p className="text-2xl font-semibold">Stem Splitter</p>
         <p className="text-sm text-neutral-400">v{version}</p>
         <p className="text-sm text-neutral-300">
-          Separa músicas do YouTube em 6 stems usando Demucs, localmente.
+          Separa músicas do YouTube em 4 stems usando Demucs (htdemucs_ft), localmente.
         </p>
       </div>
 

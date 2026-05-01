@@ -35,7 +35,7 @@ export function Sidebar() {
         <h1 className="text-base font-semibold tracking-tight text-neutral-100">
           Stem Splitter
         </h1>
-        <p className="text-xs text-neutral-500">YouTube → 6 stems</p>
+        <p className="text-xs text-neutral-500">YouTube → 4 stems</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-2">
         {ITEMS.map((item) => {

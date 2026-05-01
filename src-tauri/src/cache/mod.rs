@@ -56,8 +56,6 @@ fn parse_stem_name(name: &str) -> Option<StemName> {
         "vocals" => Some(StemName::Vocals),
         "drums" => Some(StemName::Drums),
         "bass" => Some(StemName::Bass),
-        "guitar" => Some(StemName::Guitar),
-        "piano" => Some(StemName::Piano),
         "other" => Some(StemName::Other),
         _ => None,
     }

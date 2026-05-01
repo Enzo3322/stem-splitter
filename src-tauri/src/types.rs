@@ -6,8 +6,6 @@ pub enum StemName {
     Vocals,
     Drums,
     Bass,
-    Guitar,
-    Piano,
     Other,
 }
 
@@ -17,8 +15,6 @@ impl StemName {
             Self::Vocals => "vocals",
             Self::Drums => "drums",
             Self::Bass => "bass",
-            Self::Guitar => "guitar",
-            Self::Piano => "piano",
             Self::Other => "other",
         }
     }
@@ -96,6 +92,7 @@ pub enum SidecarEvent {
         title: Option<String>,
     },
     Error {
+        #[serde(default)]
         job_id: String,
         ts: u64,
         code: String,

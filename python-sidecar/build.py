@@ -29,7 +29,7 @@ MODELS_DIR = ROOT / "_models"
 TAURI_BIN_DIR = ROOT.parent / "src-tauri" / "binaries"
 
 ENTRY = "entrypoint.py"
-DEFAULT_MODEL_NAME = "htdemucs_6s"
+DEFAULT_MODEL_NAME = "htdemucs_ft"
 
 
 def detect_target() -> str:
@@ -56,6 +56,11 @@ def is_windows(target: str) -> bool:
 
 def hidden_imports() -> list[str]:
     return [
+        "numpy",
+        "numpy.core",
+        "numpy.core.multiarray",
+        "numpy.core._methods",
+        "numpy.lib.format",
         "torch",
         "torch._C",
         "torchaudio",
@@ -71,7 +76,7 @@ def hidden_imports() -> list[str]:
 
 
 def collect_packages() -> list[str]:
-    return ["torch", "torchaudio", "demucs", "yt_dlp", "soundfile"]
+    return ["numpy", "torch", "torchaudio", "demucs", "yt_dlp", "soundfile"]
 
 
 def prepare_model_cache(model_name: str = DEFAULT_MODEL_NAME) -> Path:

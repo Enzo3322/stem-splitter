@@ -1,6 +1,6 @@
 """Pre-download dos pesos do Demucs antes do primeiro `separate`.
 
-`get_model("htdemucs_6s")` baixa um saco de 4 sub-modelos via
+`get_model("htdemucs_ft")` baixa um saco de 4 sub-modelos fine-tuned via
 `torch.hub.download_url_to_file`, que normalmente imprime tqdm em stderr.
 Aqui substituímos a função por uma versão que emite eventos `progress`
 JSONL no nosso canal padrão, com `stage="prefetch"`.
@@ -89,7 +89,7 @@ def _make_patched_download(state: _PrefetchState):
         progress: bool = True,  # noqa: ARG001 — ignorado, sempre emitimos
     ) -> None:
         # Cada chamada = um sub-modelo. Como get_model não nos diz quantos
-        # vão ser, estimamos com base no nome (htdemucs_6s = bag de 4).
+        # vão ser, estimamos com base no nome (htdemucs_ft = bag de 4).
         # Se acertar, progresso global é suave; se não, o último sub-modelo
         # ainda termina em 100% no stage_complete.
         if state.files_total == 0:
@@ -160,8 +160,8 @@ def _make_patched_download(state: _PrefetchState):
 
 
 def _guess_total_files() -> int:
-    # htdemucs_6s é um bag de 4 sub-modelos. Outros modelos tipicamente 1.
-    # Se errarmos, o `stage_complete` no fim ainda força 100% na UI.
+    # htdemucs_ft é um bag de 4 sub-modelos fine-tuned. Outros modelos
+    # tipicamente 1. Se errarmos, `stage_complete` no fim força 100% na UI.
     return 4
 
 

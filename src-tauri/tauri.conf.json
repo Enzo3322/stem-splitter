@@ -18,7 +18,8 @@
         "minWidth": 900,
         "minHeight": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "backgroundThrottling": "disabled"
       }
     ],
     "security": {
@@ -47,8 +48,8 @@
       "binaries/ffmpeg"
     ],
     "category": "Music",
-    "shortDescription": "Separa músicas do YouTube em 6 stems",
-    "longDescription": "Baixa do YouTube e separa em vocal, bateria, baixo, guitarra, piano e outros usando Demucs."
+    "shortDescription": "Separa músicas do YouTube em 4 stems",
+    "longDescription": "Baixa do YouTube e separa em vocal, bateria, baixo e outros usando Demucs (htdemucs_ft, fine-tuned)."
   },
   "plugins": {
     "shell": {

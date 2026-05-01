@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { onPrefetchEvent, prefetchModel } from "../lib/tauri";
 import { usePrefetchStore } from "../stores/prefetchStore";
 
-const PREFETCH_DONE_KEY = "ssp.prefetch-completed.htdemucs_6s.v1";
+const PREFETCH_DONE_KEY = "ssp.prefetch-completed.htdemucs_ft.v1";
 
 /** Pre-baixa pesos do Demucs ao montar. Idempotente: subsequentes
  * runs do sidecar terminam em ms se o modelo já está em cache local.
