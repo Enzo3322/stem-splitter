@@ -9,15 +9,8 @@ interface StemControls {
 }
 
 interface PlayerState {
-  playing: boolean;
-  /** Posição em segundos (master clock). */
-  position: number;
-  duration: number;
   controls: Record<StemName, StemControls>;
 
-  setPlaying: (v: boolean) => void;
-  setPosition: (s: number) => void;
-  setDuration: (s: number) => void;
   setVolume: (stem: StemName, v: number) => void;
   toggleMute: (stem: StemName) => void;
   toggleSolo: (stem: StemName) => void;
@@ -34,14 +27,8 @@ const initialControls = (): Record<StemName, StemControls> => ({
 });
 
 export const usePlayerStore = create<PlayerState>((set) => ({
-  playing: false,
-  position: 0,
-  duration: 0,
   controls: initialControls(),
 
-  setPlaying: (v) => set({ playing: v }),
-  setPosition: (s) => set({ position: s }),
-  setDuration: (s) => set({ duration: s }),
   setVolume: (stem, v) =>
     set((s) => ({
       controls: { ...s.controls, [stem]: { ...s.controls[stem], volume: Math.max(0, Math.min(1, v)) } },
@@ -54,7 +41,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     set((s) => ({
       controls: { ...s.controls, [stem]: { ...s.controls[stem], solo: !s.controls[stem].solo } },
     })),
-  reset: () => set({ playing: false, position: 0, duration: 0, controls: initialControls() }),
+  reset: () => set({ controls: initialControls() }),
 }));
 
 /**

@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { useStemPlayer } from "../hooks/useStemPlayer";
+import {
+  useEngineDuration,
+  useEnginePlaying,
+  useEnginePosition,
+  useStemPlayer,
+} from "../hooks/useStemPlayer";
 import { useJobStore } from "../stores/jobStore";
 import { usePlayerStore } from "../stores/playerStore";
 import type { Stem, StemName } from "../types/sidecar";
@@ -30,7 +35,7 @@ const DEFAULT_WINDOW_TITLE = "Stem Splitter";
 
 export function StemPlayer({ stems, cacheKey, title }: Props) {
   const player = useStemPlayer({ stems, colorOf: (n) => STEM_COLORS[n] });
-  const playing = usePlayerStore((s) => s.playing);
+  const playing = useEnginePlaying();
   const controls = usePlayerStore((s) => s.controls);
   const toggleMute = usePlayerStore((s) => s.toggleMute);
   const toggleSolo = usePlayerStore((s) => s.toggleSolo);
@@ -151,10 +156,10 @@ function fmtTime(s: number): string {
 }
 
 /** Re-renderiza só este span quando position muda. Isolado pra não
- * forçar reconciliation do StemPlayer inteiro (6 waveforms + sliders). */
+ * forçar reconciliation do StemPlayer inteiro (4 waveforms + sliders). */
 function TimeDisplay() {
-  const position = usePlayerStore((s) => s.position);
-  const duration = usePlayerStore((s) => s.duration);
+  const position = useEnginePosition();
+  const duration = useEngineDuration();
   return (
     <span className="font-mono text-sm text-neutral-400">
       {fmtTime(position)} / {fmtTime(duration)}

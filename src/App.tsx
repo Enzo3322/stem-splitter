@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AboutView } from "./components/AboutView";
 import { DeviceBadge } from "./components/DeviceBadge";
 import { LibraryView } from "./components/LibraryView";
@@ -9,6 +10,7 @@ import { StemPlayer } from "./components/StemPlayer";
 import { UrlInput } from "./components/UrlInput";
 import { usePrefetchModel } from "./hooks/usePrefetchModel";
 import { useSidecarEvents } from "./hooks/useSidecarEvents";
+import { stemEngine } from "./lib/stemEngine";
 import { useJobStore } from "./stores/jobStore";
 import { useViewStore } from "./stores/viewStore";
 
@@ -17,6 +19,18 @@ export default function App() {
   usePrefetchModel();
   const view = useViewStore((s) => s.view);
   const setView = useViewStore((s) => s.setView);
+
+  // Quando o job é resetado (ou cai pra idle), pare o engine de áudio.
+  // Subscrição direta no jobStore — não acopla a UI ao engine.
+  useEffect(() => {
+    let lastStatus = useJobStore.getState().status;
+    return useJobStore.subscribe((s) => {
+      if (lastStatus !== "idle" && s.status === "idle") {
+        stemEngine.reset();
+      }
+      lastStatus = s.status;
+    });
+  }, []);
 
   return (
     <div className="flex h-full">
